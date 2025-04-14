@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-# REST-API-Customer-Perpustakaan
-=======
-# perpustakaan
+# quarkus-getting-started
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
@@ -52,19 +49,9 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 ./mvnw package -Dnative -Dquarkus.native.container-build=true
 ```
 
-You can then execute your native executable with: `./target/perpustakaan-1.0-SNAPSHOT-runner`
+You can then execute your native executable with: `./target/quarkus-getting-started-1.0.0-SNAPSHOT-runner`
 
 If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and
-  Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on
-  it.
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus
-  REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Reactive PostgreSQL client ([guide](https://quarkus.io/guides/reactive-sql-clients)): Connect to the PostgreSQL
-  database using the reactive pattern
 
 ## Provided Code
 
@@ -73,4 +60,3 @@ If you want to learn more about building native executables, please consult <htt
 Easily start your REST Web Services
 
 [Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
->>>>>>> 01bca52 (apload file)
