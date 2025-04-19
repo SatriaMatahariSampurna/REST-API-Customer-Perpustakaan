@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
 import java.util.List;
 
 /**
@@ -20,7 +19,7 @@ import java.util.List;
 public class CustomerResource {
 
     @Inject
-    CustomerService customerservice; // Injeksi service yang akan digunakan untuk operasi bisnis
+    CustomerService customerService; // Injeksi service yang akan digunakan untuk operasi bisnis
 
     /**
      * Endpoint untuk mengambil semua data customer.
@@ -29,20 +28,48 @@ public class CustomerResource {
      */
     @GET
     public List<CustomerData> getCustomers() {
-        return customerservice.getCustomers();
+        return customerService.getCustomers();
     }
 
     /**
-     * Endpoint untuk menambahkan customer baru.
-     * URL: POST /customers
+     * Endpoint untuk menambahkan customer baru menggunakan prosedur.
+     * URL: POST /customers/procedure
      * Body: JSON CustomerData
      * @param customer data customer yang dikirimkan oleh client
      * @return Response status CREATED (201) jika berhasil
      */
     @POST
-    public Response addCustomer(CustomerData customer) {
-        customerservice.addCustomer(customer);
-        return Response.status(Response.Status.CREATED).entity(customer).build();
+    @Path("/procedure")
+    public Response addCustomerWithProcedure(CustomerData customer) {
+        // Memanggil service untuk menambahkan customer menggunakan prosedur
+        customerService.addCustomerWithProcedure(customer);
+        return Response.status(Response.Status.CREATED)  // Mengembalikan status 201 jika berhasil
+                       .entity("Customer created with procedure")
+                       .build();
+    }
+
+    /**
+     * Endpoint untuk menambahkan customer baru menggunakan fungsi.
+     * URL: POST /customers/function
+     * Body: JSON CustomerData
+     * @param customer data customer yang dikirimkan oleh client
+     * @return Response status CREATED (201) dan ID baru jika berhasil
+     */
+    @POST
+    @Path("/function")
+    public Response addCustomerWithFunction(CustomerData customer) {
+        // Memanggil service untuk menambahkan customer menggunakan fungsi
+        int newId = customerService.addCustomerWithFunction(customer);
+        
+        if (newId != -1) {
+            return Response.status(Response.Status.CREATED)  // Mengembalikan status 201 jika berhasil
+                           .entity("Customer created with ID: " + newId)
+                           .build();
+        } else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity("Failed to create customer.")
+                           .build();
+        }
     }
 
     /**
@@ -54,7 +81,7 @@ public class CustomerResource {
     @DELETE
     @Path("/{id}")
     public Response deleteCustomer(@PathParam("id") Long id) {
-        boolean deleted = customerservice.deleteCustomer(id);
+        boolean deleted = customerService.deleteCustomer(id);
         if (deleted) {
             return Response.ok().build(); // Berhasil dihapus
         } else {
@@ -76,7 +103,7 @@ public class CustomerResource {
     @Path("/{id}")
     public Response updateCustomer(@PathParam("id") Long id, CustomerData customerData) {
         // Memanggil service untuk update customer
-        boolean updated = customerservice.updateCustomer(id, customerData);
+        boolean updated = customerService.updateCustomer(id, customerData);
         
         // Jika update berhasil
         if (updated) {
