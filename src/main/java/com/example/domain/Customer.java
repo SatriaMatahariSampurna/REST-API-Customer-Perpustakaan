@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 
 @Entity
 public class Customer extends PanacheEntityBase {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Ubah dari String ke Long

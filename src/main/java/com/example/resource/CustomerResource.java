@@ -1,5 +1,7 @@
 package com.example.resource;
 
+import com.example.dto.ApiResponse; // Import ApiResponse
+import com.example.dto.ApiResponseWithData; // Import ApiResponseWithData
 import com.example.dto.CustomerData;
 import com.example.service.CustomerService;
 import jakarta.inject.Inject;
@@ -27,8 +29,12 @@ public class CustomerResource {
      * @return List CustomerData dalam format JSON
      */
     @GET
-    public List<CustomerData> getCustomers() {
-        return customerService.getCustomers();
+    public Response getCustomers() {
+        List<CustomerData> customers = customerService.getCustomers();
+        ApiResponseWithData<List<CustomerData>> response = new ApiResponseWithData<>(
+            true, "Customer list fetched successfully", customers
+        );
+        return Response.ok(response).build();
     }
 
     /**
@@ -36,16 +42,19 @@ public class CustomerResource {
      * URL: POST /customers/procedure
      * Body: JSON CustomerData
      * @param customer data customer yang dikirimkan oleh client
-     * @return Response status CREATED (201) jika berhasil
+     * @return Response status OK (200) dan pesan berhasil
      */
     @POST
     @Path("/procedure")
     public Response addCustomerWithProcedure(CustomerData customer) {
         // Memanggil service untuk menambahkan customer menggunakan prosedur
         customerService.addCustomerWithProcedure(customer);
-        return Response.status(Response.Status.CREATED)  // Mengembalikan status 201 jika berhasil
-                       .entity("Customer created with procedure")
-                       .build();
+
+        // Buat response menggunakan ApiResponse dengan status success: true
+        ApiResponse response = new ApiResponse(true, "Customer created with procedure");
+
+        // Mengembalikan status 200 OK dan body JSON
+        return Response.ok(response).build();
     }
 
     /**
@@ -53,21 +62,29 @@ public class CustomerResource {
      * URL: POST /customers/function
      * Body: JSON CustomerData
      * @param customer data customer yang dikirimkan oleh client
-     * @return Response status CREATED (201) dan ID baru jika berhasil
+     * @return Response status CREATED (201) dan data customer jika berhasil
      */
     @POST
     @Path("/function")
     public Response addCustomerWithFunction(CustomerData customer) {
         // Memanggil service untuk menambahkan customer menggunakan fungsi
         int newId = customerService.addCustomerWithFunction(customer);
-        
+
         if (newId != -1) {
-            return Response.status(Response.Status.CREATED)  // Mengembalikan status 201 jika berhasil
-                           .entity("Customer created with ID: " + newId)
-                           .build();
+            // Jika berhasil, buat object CustomerData baru dengan ID hasil dari fungsi
+            CustomerData newCustomer = new CustomerData((long) newId, customer.name(), customer.balance());
+
+            // Buat response menggunakan ApiResponseWithData
+            ApiResponseWithData<CustomerData> response = new ApiResponseWithData<>(
+                true, "Customer created successfully", newCustomer
+            );
+
+            return Response.ok(response).build();  // HTTP 200 OK dengan body JSON
         } else {
+            // Jika gagal, kembalikan response error menggunakan ApiResponse
+            ApiResponse response = new ApiResponse(false, "Failed to create customer.");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                           .entity("Failed to create customer.")
+                           .entity(response)
                            .build();
         }
     }
@@ -83,10 +100,12 @@ public class CustomerResource {
     public Response deleteCustomer(@PathParam("id") Long id) {
         boolean deleted = customerService.deleteCustomer(id);
         if (deleted) {
-            return Response.ok().build(); // Berhasil dihapus
+            ApiResponse response = new ApiResponse(true, "Customer deleted successfully");
+            return Response.ok(response).build(); // Berhasil dihapus
         } else {
+            ApiResponse response = new ApiResponse(false, "Customer with ID " + id + " not found");
             return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Customer with ID " + id + " not found")
+                           .entity(response)
                            .build(); // Tidak ditemukan
         }
     }
@@ -107,11 +126,15 @@ public class CustomerResource {
         
         // Jika update berhasil
         if (updated) {
-            return Response.ok().entity(customerData).build();
+            ApiResponseWithData<CustomerData> response = new ApiResponseWithData<>(
+                true, "Customer updated successfully", customerData
+            );
+            return Response.ok(response).build();
         } else {
             // Jika customer dengan ID tidak ditemukan
+            ApiResponse response = new ApiResponse(false, "Customer with ID " + id + " not found");
             return Response.status(Response.Status.NOT_FOUND)
-                           .entity("Customer with ID " + id + " not found")
+                           .entity(response)
                            .build();
         }
     }
